@@ -1,5 +1,12 @@
 class Plane(object):
     def __init__(self, m, l, Sw, Ix, Iy, Iz, Ixy, Iyz, Izx, cA):
+        # 客观世界参数与初始条件
+        self._g = 9.8  # 重力加速度
+        self._M = 340.0  # 马赫数对应声速
+        self._M0 = 0.0  # 初始马赫数
+        self._V0 = 0.0
+        self._h = 0.0  # 飞行高度
+        self._rho = 0.0371  # 空气密度
         # 飞机物理参数
         self._m = m  # 质量
         self._l = l  # 翼展
@@ -11,6 +18,7 @@ class Plane(object):
         self._Iyz = Iyz
         self._Izx = Izx
         self._cA = cA  # 平均气动弦长
+        self._alpha0 = 0.0
         self._u = 0.0  # 翼展变形率
         self._v = 0.0  # 翼角变形率
         self._zt = 0.0  # 发动机推力向量到机体 x 轴的距离
@@ -24,6 +32,7 @@ class Plane(object):
         self._CLdeltae = 0.0  # 升降舵偏转对升力的影响
         self._CD0 = 0.0
         self._CDa = 0.0
+        self._CDa2 = 0.0
         self._CDM = 0.0
         self._Cm0 = 0.0
         self._Cma = 0.0
@@ -64,6 +73,27 @@ class Plane(object):
         self._a3 = 1.0
         self._Stability = True
 
+    def setg(self, g):
+        self._g = g
+
+    def setM(self, M):
+        self._M = M
+
+    def setM0(self, M0):
+        self._M0 = M0
+
+    def setV0(self, V0):
+        self._V0 = V0
+
+    def seth(self, h):
+        self._h = h
+
+    def setrho(self, rho):
+        self._rho = rho
+
+    def setalpha0(self, alpha0):
+        self._alpha0 = alpha0
+
     def setu(self, u):
         self._u = u
 
@@ -99,6 +129,9 @@ class Plane(object):
 
     def setCDa(self, CDa):
         self._CDa = CDa
+
+    def setCDa2(self, CDa2):
+        self._CDa2 = CDa2
 
     def setCDM(self, CDM):
         self._CDM = CDM
@@ -152,22 +185,22 @@ class Plane(object):
         print('-'*80)
         print('*'*80)
 
-    def computeDV(self, V0, rho, M0):
-        self._DV = (1/V0)*((1/2)*rho*(V0**2)) * \
-            self._Sw*(2*self._CD0+M0*self._CDM)
+    def computeDV(self):
+        self._DV = (1/self._V0)*((1/2)*self._rho*(self._V0**2)) * \
+            self._Sw*(2*self._CD0+self._M0*self._CDM)
         # print('*'*20)
         # print("computeDV")
         # print('*'*20)
-        # print(f"V0:{V0}")
-        # print(f"rho:{rho}")
+        # print(f"V0:{self._V0}")
+        # print(f"rho:{self._rho}")
         # print(f"Sw:{self._Sw}")
         # print(f"CD0:{self._CD0}")
-        # print(f"M0:{M0}")
+        # print(f"M0:{self._M0}")
         # print(f"CDM:{self._CDM}")
         # print(f"DV:{self._DV}")
 
-    def computeDa(self, V0, rho):
-        self._Da = self._CDa*(1/2)*rho*V0**2*self._Sw
+    def computeDa(self,):
+        self._Da = self._CDa*(1/2)*self._rho*self._V0**2*self._Sw
         # print('*'*20)
         # print("computeDa")
         # print('*'*20)
@@ -177,52 +210,52 @@ class Plane(object):
         # print(f"Sw:{self._Sw}")
         # print(f"Da:{self._Da}")
 
-    def computeLV(self, V0, rho, M0):
-        self._LV = (1/V0)*((1/2)*rho*(V0**2)) * \
-            self._Sw*(2*self._CL0+M0*self._CLM)
-        print('*'*20)
-        print("computeLV")
-        print('*'*20)
-        print(f"V0:{V0}")
-        print(f"rho:{rho}")
-        print(f"Sw:{self._Sw}")
-        print(f"CL0:{self._CL0}")
-        print(f"M0:{M0}")
-        print(f"CLM:{self._CLM}")
-        print(f"LV:{self._LV}")
+    def computeLV(self):
+        self._LV = (1/self._V0)*((1/2)*self._rho*(self._V0**2)) * \
+            self._Sw*(2*self._CL0+self._M0*self._CLM)
+        # print('*'*20)
+        # print("computeLV")
+        # print('*'*20)
+        # print(f"V0:{self._V0}")
+        # print(f"rho:{self._rho}")
+        # print(f"Sw:{self._Sw}")
+        # print(f"CL0:{self._CL0}")
+        # print(f"M0:{self._M0}")
+        # print(f"CLM:{self._CLM}")
+        # print(f"LV:{self._LV}")
 
-    def computeLa(self, V0, rho):
-        self._La = self._CLa*(1/2)*rho*V0**2*self._Sw
+    def computeLa(self):
+        self._La = self._CLa*(1/2)*self._rho*self._V0**2*self._Sw
 
-    def computeLdeltae(self, V0, rho):
-        self._Ldeltae = self._CLdeltae*(1/2)*rho*V0**2*self._Sw
+    def computeLdeltae(self):
+        self._Ldeltae = self._CLdeltae*(1/2)*self._rho*self._V0**2*self._Sw
 
-    def computeMaV(self, V0, rho, M0):
-        self._MaV = ((2*self._Cm0+M0*self._CmM)/V0) * \
-            ((1/2)*rho*V0**2)*self._cA*self._Sw
+    def computeMaV(self):
+        self._MaV = ((2*self._Cm0+self._M0*self._CmM)/self._V0) * \
+            ((1/2)*self._rho*self._V0**2)*self._cA*self._Sw
 
-    def computeMaa(self, V0, rho):
-        self._Maa = ((1/2)*rho*V0**2)*self._cA*self._Sw*self._Cma
+    def computeMaa(self):
+        self._Maa = ((1/2)*self._rho*self._V0**2)*self._cA*self._Sw*self._Cma
 
-    def computeMaadot(self, V0, rho):
-        self._Maadot = ((1/2)*rho*V0**2)*(self._cA **
-                                          2/(2*V0))*self._Sw*self._Cmadot
+    def computeMaadot(self):
+        self._Maadot = ((1/2)*self._rho*self._V0**2)*(self._cA **
+                                                      2/(2*self._V0))*self._Sw*self._Cmadot
 
-    def computeMaq(self, V0, rho):
-        self._Maq = ((1/2)*rho*V0**2)*(self._cA **
-                                       2/(2*V0))*self._Sw*self._Cmq
+    def computeMaq(self):
+        self._Maq = ((1/2)*self._rho*self._V0**2)*(self._cA **
+                                                   2/(2*self._V0))*self._Sw*self._Cmq
         # print('*'*20)
         # print("computeMaq")
         # print('*'*20)
-        # print(f"rho:{rho}")
-        # print(f"V0:{V0}")
+        # print(f"rho:{self._rho}")
+        # print(f"V0:{self._V0}")
         # print(f"cA:{self._cA}")
         # print(f"Sw:{self._Sw}")
         # print(f"Cmq:{self._Cmq}")
 
-    def computeMadeltae(self, V0, rho):
-        self._Madeltae = ((1/2)*rho*V0**2)*(self._cA**2 /
-                                            (2*V0))*self._Sw*self._Cmdeltae
+    def computeMadeltae(self):
+        self._Madeltae = ((1/2)*self._rho*self._V0**2)*(self._cA**2 /
+                                                        (2*self._V0))*self._Sw*self._Cmdeltae
 
     def computeXV(self):
         self._XV = (self._DV-self._TV)/self._m
@@ -234,34 +267,34 @@ class Plane(object):
         # print(f"m:{self._m}")
         # print(f"XV:{self._XV}")
 
-    def computeXa(self, V0, g):
-        self._Xa = self._Da/(self._m*V0)-g/V0
+    def computeXa(self):
+        self._Xa = self._Da/(self._m*self._V0)-self._g/self._V0
         # print('*'*20)
         # print("computeXa")
         # print('*'*20)
         # print(f"Da:{self._Da}")
         # print(f"m:{self._m}")
-        # print(f"V0:{V0}")
-        # print(f"g:{g}")
+        # print(f"V0:{self._V0}")
+        # print(f"g:{self._g}")
         # print(f"Xa:{self._Xa}")
 
-    def computeXtheta(self, V0, g):
-        self._Xtheta = g/V0
+    def computeXtheta(self):
+        self._Xtheta = self._g/self._V0
 
-    def computeZV(self, V0):
-        self._ZV = self._LV/(self._m*V0)
-        print('*'*20)
-        print("computeZV")
-        print('*'*20)
-        print(f"LV:{self._LV}")
-        print(f"m:{self._m}")
-        print(f"V0:{V0}")
+    def computeZV(self):
+        self._ZV = self._LV/(self._m*self._V0)
+        # print('*'*20)
+        # print("computeZV")
+        # print('*'*20)
+        # print(f"LV:{self._LV}")
+        # print(f"m:{self._m}")
+        # print(f"V0:{self._V0}")
 
-    def computeZa(self, V0):
-        self._Za = self._La/(self._m*V0)
+    def computeZa(self):
+        self._Za = self._La/(self._m*self._V0)
 
-    def computeMV(self, V0):
-        self._MV = -(V0*(self._MaV+self._TV*self._zt)/self._Iy)
+    def computeMV(self):
+        self._MV = -(self._V0*(self._MaV+self._TV*self._zt)/self._Iy)
 
     def computeMa(self):
         self._Ma = -self._Maa/self._Iy
@@ -277,11 +310,11 @@ class Plane(object):
         # print(f"Maq:{self._Maq}")
         # print(f"Iy:{self._Iy}")
 
-    def computeXdeltat(self, V0):
-        self._Xdeltat = -(self._Tdeltat/(self._m*V0))
+    def computeXdeltat(self):
+        self._Xdeltat = -(self._Tdeltat/(self._m*self._V0))
 
-    def computeZdeltae(self, V0):
-        self._Zdeltae = self._Ldeltae/(self._m*V0)
+    def computeZdeltae(self):
+        self._Zdeltae = self._Ldeltae/(self._m*self._V0)
 
     def computeMdeltae(self):
         self._Mdeltae = -self._Madeltae/self._Iy
@@ -289,25 +322,25 @@ class Plane(object):
     def computeMdeltat(self):
         self._Mdeltat = -(self._Tdeltat*self._zt)/self._Iy
 
-    def computeBigDerivative(self, V0, rho, M0, g):
-        self.computeDV(V0, rho, M0)
-        self.computeDa(V0, rho)
-        self.computeLV(V0, rho, M0)
-        self.computeLa(V0, rho)
-        self.computeLdeltae(V0, rho)
-        self.computeMaV(V0, rho, M0)
-        self.computeMaa(V0, rho)
-        self.computeMaadot(V0, rho)
-        self.computeMaq(V0, rho)
-        self.computeMadeltae(V0, rho)
+    def computeBigDerivative(self):
+        self.computeDV()
+        self.computeDa()
+        self.computeLV()
+        self.computeLa()
+        self.computeLdeltae()
+        self.computeMaV()
+        self.computeMaa()
+        self.computeMaadot()
+        self.computeMaq()
+        self.computeMadeltae()
         self.computeXV()
-        self.computeXa(V0, g)
-        self.computeXtheta(V0, g)
-        self.computeXdeltat(V0)
-        self.computeZV(V0)
-        self.computeZa(V0)
-        self.computeZdeltae(V0)
-        self.computeMV(V0)
+        self.computeXa()
+        self.computeXtheta()
+        self.computeXdeltat()
+        self.computeZV()
+        self.computeZa()
+        self.computeZdeltae()
+        self.computeMV()
         self.computeMadot()
         self.computeMa()
         self.computeMq()
@@ -369,6 +402,18 @@ class Plane(object):
         self.judgeStability()
         return self._Stability
 
+    def transform(self, u, v):
+        x = u
+        y = v
+        self._CL0 = -0.041*x**2 + 0.001*x*y - 0.019*y**2 + 0.106*x + 0.002*y + 0.076
+        self._CLa = -0.007*x**2 - 0.000*x*y - 0.004*y**2 + 0.010*x - 0.001*y + 0.101
+        self._CD0 = +0.002*x**2 + 0.000*x*y + 0.001*y**2 + 0.002*x - 0.000*y + 0.016
+        self._CDa = -0.000*x**2 + 0.000*x*y - 6.666*y**2 + 0.000*x - 8.333*y + 0.000
+        self._CDa2 = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
+        self._Cm0 = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
+        self._Cma = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
+        self.computeBigDerivative()
+        self.judgeStability()
 
 # # 飞机物理参数
 # m  # 质量
@@ -427,19 +472,21 @@ class Plane(object):
 # Zdeltae = 0.0
 # Mdeltae = 0.0
 # Mdeltat = 0.0
-g = 9.8  # 重力加速度
-M = 285.0  # 马赫数对应声速
-M0 = 0.9  # 初始马赫数
-# V0 = 266.0  # 初始速度
-V0 = M0*M
-h = 11000.0  # 飞行高度
-rho = 0.0371  # 空气密度
+
+
 if __name__ == "__main__":
     print('*'*80)
     print("Plane类测试")
     print('*'*80)
-    a = 285.0  # 空速？
-    a0 = 3.62  # 初始迎角
+    g = 9.8  # 重力加速度
+    M = 285.0  # 马赫数对应声速
+    M0 = 0.9  # 初始马赫数
+    # V0 = 266.0  # 初始速度
+    V0 = M0*M
+    h = 11000.0  # 飞行高度
+    rho = 0.0371  # 空气密度
+
+    alpha0 = 3.62  # 初始迎角
     print(f"V0:{V0}")
     # 设置飞机物理参数
     m = 9000.0
@@ -476,6 +523,13 @@ if __name__ == "__main__":
 
     # 初始化飞机
     testPlane = Plane(m, l, Sw, Ix, Iy, Iz, Ixy, Iyz, Izx, cA)
+    testPlane.setg(g=g)
+    testPlane.setM(M=M)
+    testPlane.setM0(M0=M0)
+    testPlane.setV0(V0=V0)
+    testPlane.seth(h=h)
+    testPlane.setrho(rho=rho)
+    testPlane.setalpha0(alpha0=alpha0)
     testPlane.setu(u=u)
     testPlane.setv(v=v)
     testPlane.setzt(zt=zt)
@@ -496,7 +550,7 @@ if __name__ == "__main__":
     testPlane.setCmM(CmM=CmM)
     testPlane.setCmdeltae(Cmdeltae=Cmdeltae)
     # 求大导数
-    testPlane.computeBigDerivative(V0, rho, M0, g)
+    testPlane.computeBigDerivative()
     # 打印大导数
     testPlane.printBigDerivative()
     testPlane.judgeStability()
