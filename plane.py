@@ -192,6 +192,8 @@ class Plane(object):
         print(f"gamma0:                     {self._gamma0}")
         print(f"推力矢量到机体x轴的距离zt:  {self._zt} m")
         print(f"稳定性:                     {self._Stability}")
+        print(f"长周期阻尼比zetap:           {abs(self._zetap)}")
+        print(f"短周期阻尼比zetasp:          {abs(self._zetasp)}")
         print('-'*80)
         print('*'*80)
 
