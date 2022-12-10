@@ -74,6 +74,6 @@ if __name__ == "__main__":
     TransformablePlane.printBigDerivative()
     TransformablePlane.judgeStability()
     TransformablePlane.printInfo()
-    TransformablePlane.transform(0.5, 1)
+    # TransformablePlane.transform(0.5, 1)
     TransformablePlane.printBigDerivative()
     TransformablePlane.printInfo()

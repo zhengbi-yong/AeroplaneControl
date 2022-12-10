@@ -71,6 +71,12 @@ class Plane(object):
         self._a1 = 1.0
         self._a2 = 1.0
         self._a3 = 1.0
+        self._wnp = 0.0
+        self._zetap = 0.0
+        self._wnsp = 0.0
+        self._zetasp = 0.0
+        self._pStablity = True
+        self._spStability = True
         self._Stability = True
 
     def setg(self, g):
@@ -351,6 +357,19 @@ class Plane(object):
         self.computeMdeltae()
         self.computeMdeltat()
 
+    def computewnp(self):
+        self._wnp = (-self._ZV*self._g/self._V0)**0.5
+
+    def computezetap(self):
+        self._zetap = -self._XV/(2*abs(self._wnp))
+
+    def computewnsp(self):
+        self._wnsp = (self._ZV*self._Mq/self._V0-self._Ma)**0.5
+
+    def computezetasp(self):
+        self._zetasp = -(self._Mq+self._Madot+self._Za /
+                         self._V0)/(2*abs(self._wnsp))
+
     # 一定要在计算完大导数之后再使用该函数判断稳定性
     def judgeStability(self):
         self._a3 = self._Mq+self._Za+self._Madot+self._XV
@@ -360,7 +379,19 @@ class Plane(object):
             (self._ZV*self._Madot-self._MV) - \
             self._Xa*(self._ZV*self._Mq+self._MV)
         self._a0 = self._Xtheta*(self._ZV*self._Ma-self._MV*self._Za)
-        if ((self._a0 > 0) and (self._a1 > 0) and (self._a2 > 0) and (self._a3 > 0)):
+        self.computewnp()
+        self.computezetap()
+        self.computewnsp()
+        self.computezetasp()
+
+        def isStable(zeta):
+            if(zeta**2 > 0.0):
+                return True
+            else:
+                return False
+        self._pStablity = isStable(self._zetap)
+        self._spStablity = isStable(self._zetasp)
+        if((self._pStablity == True) and (self._spStability == True)):
             self._Stability = True
         else:
             self._Stability = False
