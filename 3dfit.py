@@ -102,15 +102,16 @@ def matching_3D(X, Y, Z):
     fig = plt.figure()  # 建立一个空间
     ax = fig.add_subplot(111, projection='3d')  # 3D坐标
     n = 256
-    u = np.linspace(-20, 20, n)  # 创建一个等差数列
+    u = np.linspace(-2, 2, n)  # 创建一个等差数列
     x, y = np.meshgrid(u, u)  # 转化成矩阵
     # 给出方程
     z = res[0] * x * x + res[1] * x * y + res[2] * \
         y * y + res[3] * x + res[4] * y + res[5]
     # 画出曲面
-    ax.plot_surface(x, y, z, rstride=3, cstride=3, cmap=cm.jet)
+    # ax.plot_surface(x, y, z, rstride=3, cstride=3, cmap=cm.jet)
+    ax.plot_surface(x, y, z, rstride=3, cstride=3, cmap=cm.rainbow, alpha=0.4)
     # 画出点
-    ax.scatter(X, Y, Z, c='r')
+    ax.scatter(X, Y, Z, c='g')
     plt.show()
 
 
@@ -128,31 +129,34 @@ if __name__ == "__main__":
     CD0list = DragData[1:, 2]
     CDalist = DragData[1:, 3]
     CDa2list = DragData[1:, 4]
+    print(f"CDa2:{CDa2list}")
     Cm0list = PTData[1:, 2]
+    print(f"Cm0:{CDa2list}")
     Cmalist = PTData[1:, 3]
-    print('*'*80)
-    print("CL0")
-    matching_3D(ulist, vlist, CL0list)
-    print('*'*80)
-    print('*'*80)
-    print("CLa")
-    matching_3D(ulist, vlist, CLalist)
-    print('*'*80)
-    print('*'*80)
-    print("CD0")
-    matching_3D(ulist, vlist, CD0list)
-    print('*'*80)
-    print("CDa")
-    matching_3D(ulist, vlist, CDalist)
-    print('*'*80)
-    print("CDa2")
-    matching_3D(ulist, vlist, CDa2list)
-    print('*'*80)
-    print('*'*80)
-    print("Cm0")
-    matching_3D(ulist, vlist, CDa2list)
-    print('*'*80)
+    # 打印拟合出的方程
+    # print('*'*80)
+    # print("CL0")
+    # matching_3D(ulist, vlist, CL0list)
+    # print('*'*80)
+    # print('*'*80)
+    # print("CLa")
+    # matching_3D(ulist, vlist, CLalist)
+    # print('*'*80)
+    # print('*'*80)
+    # print("CD0")
+    # matching_3D(ulist, vlist, CD0list)
+    # print('*'*80)
+    # print("CDa")
+    # matching_3D(ulist, vlist, CDalist)
+    # print('*'*80)
+    # print("CDa2")
+    # matching_3D(ulist, vlist, CDa2list)
+    # print('*'*80)
+    # print('*'*80)
+    # print("Cm0")
+    # matching_3D(ulist, vlist, Cm0list)
+    # print('*'*80)
     print('*'*80)
     print("Cma")
-    matching_3D(ulist, vlist, CDa2list)
+    matching_3D(ulist, vlist, Cmalist)
     print('*'*80)

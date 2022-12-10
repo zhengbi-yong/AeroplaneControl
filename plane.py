@@ -94,12 +94,6 @@ class Plane(object):
     def setalpha0(self, alpha0):
         self._alpha0 = alpha0
 
-    def setu(self, u):
-        self._u = u
-
-    def setv(self, v):
-        self._v = v
-
     def setzt(self, zt):
         self._zt
 
@@ -158,15 +152,25 @@ class Plane(object):
         print('*'*80)
         print("飞机参数")
         print('-'*80)
-        print(f"质量:  {self._m:>10} kg")
-        print(f"翼展:  {self._l:>10} m")
-        print(f"翼面积:{self._Sw:>10} m^2")
+        print(f"质量:  {self._m:>15} kg")
+        print(f"翼展:  {self._l:>15} m")
+        print(f"翼面积:{self._Sw:>15} m^2")
+        print(f"重力加速度g:  {self._g:>10} kg*m/s^2")
+        print(f"当地马赫数M:  {self._M:>10} m/s")
+        print(f"初始马赫数M0: {self._M0:>10}")
+        print(f"初始速度:     {self._V0:>10} m/s")
+        print(f"飞行高度h:    {self._h:>10} m")
+        print(f"空气密度rho:  {self._rho:>10}")
+        print(f"初始迎角:     {self._alpha0:>10}")
+        print(f"升降舵偏转对升力的影响CLdeltae: {self._CLdeltae:>10}")
+        print(f"升降舵对俯仰力矩的系数Cmdeltae: {self._Cmdeltae:>10}")
         print(
-            f"转动惯量:Ix :{self._Ix:>10} kg*m^2 Iy:{self._Iy:>10} kg*m^2 Iz:{self._Iz:>10} kg*m^2")
+            f"转动惯量 Ix :{self._Ix:>10} kg*m^2 Iy:{self._Iy:>10} kg*m^2 Iz:{self._Iz:>10} kg*m^2")
         print(
-            f"惯性积:Ixy:{self._Ixy:>13} m^4 Iyz:{self._Iyz:>12} m^4 Izx:{self._Izx:>12} m^4")
+            f"惯性积   Ixy:{self._Ixy:>10} m^4    Iyz:{self._Iyz:>9} m^4    Izx:{self._Izx:>9} m^4")
         print(f"平均气动弦长cA:             {self._cA} m")
-        print(f"翼展变形率lambda:{self._u}\n翼角变形率rho:{self._v}")
+        print(f"翼展变形率lambda:           {self._u}")
+        print(f"翼角变形率rho:              {self._v}")
         print(f"零迎角升力系数CL0:          {self._CL0}")
         print(f"迎角升力系数CLa:            {self._CLa}")
         print(f"马赫数升力系数CLM:          {self._CLM}")
@@ -174,14 +178,14 @@ class Plane(object):
         print(f"迎角阻力系数CDa:            {self._CDa}")
         print(f"马赫数阻力系数CDM:          {self._CDM}")
         print(f"迎角力矩系数Cma:            {self._Cma}")
-        print(f"地面轴角速度力矩系数Cmq:     {self._Cmq}")
-        print(f"机体轴角速度力矩系数Cmadot:  {self._Cmadot}")
-        print(f"马赫数力矩系数CmM:           {self._CmM}")
-        print(f"发动机推力系数Tdeltat:       {self._Tdeltat}")
-        print(f"推力对速度偏导数:            {self._TV}")
-        print(f"gamma0:                    {self._gamma0}")
-        print(f"推力矢量到机体x轴的距离zt:   {self._zt} m")
-        print(f"稳定性:                    {self._Stability}")
+        print(f"地面轴角速度力矩系数Cmq:    {self._Cmq}")
+        print(f"机体轴角速度力矩系数Cmadot: {self._Cmadot}")
+        print(f"马赫数力矩系数CmM:          {self._CmM}")
+        print(f"发动机推力系数Tdeltat:      {self._Tdeltat}")
+        print(f"推力对速度偏导数:           {self._TV}")
+        print(f"gamma0:                     {self._gamma0}")
+        print(f"推力矢量到机体x轴的距离zt:  {self._zt} m")
+        print(f"稳定性:                     {self._Stability}")
         print('-'*80)
         print('*'*80)
 
@@ -403,15 +407,17 @@ class Plane(object):
         return self._Stability
 
     def transform(self, u, v):
-        x = u
-        y = v
+        self._u = u
+        self._v = v
+        x = self._u
+        y = self._v
         self._CL0 = -0.041*x**2 + 0.001*x*y - 0.019*y**2 + 0.106*x + 0.002*y + 0.076
         self._CLa = -0.007*x**2 - 0.000*x*y - 0.004*y**2 + 0.010*x - 0.001*y + 0.101
         self._CD0 = +0.002*x**2 + 0.000*x*y + 0.001*y**2 + 0.002*x - 0.000*y + 0.016
         self._CDa = -0.000*x**2 + 0.000*x*y - 6.666*y**2 + 0.000*x - 8.333*y + 0.000
         self._CDa2 = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
-        self._Cm0 = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
-        self._Cma = +0.000*x**2 + 3.079*x*y + 2.226*y**2 - 0.000*x - 2.436*y + 0.000
+        self._Cm0 = +0.123*x**2 - 0.085*x*y + 0.039*y**2 - 0.337*x - 0.091*y + 0.246
+        self._Cma = +0.011*x**2 - 0.040*x*y - 6.666*y**2 - 0.023*x - 0.043*y - 0.046
         self.computeBigDerivative()
         self.judgeStability()
 
@@ -478,16 +484,14 @@ if __name__ == "__main__":
     print('*'*80)
     print("Plane类测试")
     print('*'*80)
+    # 设置客观世界参数
     g = 9.8  # 重力加速度
     M = 285.0  # 马赫数对应声速
     M0 = 0.9  # 初始马赫数
-    # V0 = 266.0  # 初始速度
     V0 = M0*M
     h = 11000.0  # 飞行高度
     rho = 0.0371  # 空气密度
-
     alpha0 = 3.62  # 初始迎角
-    print(f"V0:{V0}")
     # 设置飞机物理参数
     m = 9000.0
     l = 10.0
@@ -510,7 +514,7 @@ if __name__ == "__main__":
     CL0 = 0.246
     CLa = 3.9
     CLM = 0.23
-    CLdeltae = 0.0  # 升降舵偏转对升力的影响
+    CLdeltae = 0.0119  # 升降舵偏转对升力的影响
     CD0 = 0.0306
     CDa = 0.284
     CDM = 0.055
@@ -519,7 +523,7 @@ if __name__ == "__main__":
     Cmq = -7.06
     Cmadot = -2.792
     CmM = -0.0654
-    Cmdeltae = 0.0  # 升降舵对俯仰力矩的系数
+    Cmdeltae = -0.0385  # 升降舵对俯仰力矩的系数
 
     # 初始化飞机
     testPlane = Plane(m, l, Sw, Ix, Iy, Iz, Ixy, Iyz, Izx, cA)
@@ -530,8 +534,6 @@ if __name__ == "__main__":
     testPlane.seth(h=h)
     testPlane.setrho(rho=rho)
     testPlane.setalpha0(alpha0=alpha0)
-    testPlane.setu(u=u)
-    testPlane.setv(v=v)
     testPlane.setzt(zt=zt)
     testPlane.setTV(TV=TV)
     testPlane.setgamma0(gamma0=gamma0)
@@ -554,4 +556,7 @@ if __name__ == "__main__":
     # 打印大导数
     testPlane.printBigDerivative()
     testPlane.judgeStability()
+    testPlane.printInfo()
+    testPlane.transform(0.5, 1)
+    testPlane.printBigDerivative()
     testPlane.printInfo()
